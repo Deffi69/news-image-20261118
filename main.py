@@ -65,6 +65,103 @@ def star(draw, cx, cy, r_out, r_in, points, fill):
     draw.polygon(pts, fill=fill)
 
 
+ACCENTS = [(178, 34, 24), (217, 119, 6), (31, 122, 77), (30, 80, 160),
+           (122, 60, 160), (0, 130, 140), (200, 60, 110), (90, 110, 30)]
+
+
+def draw_glasses(d, cx, cy, r):
+    d.ellipse([cx - r - r * 0.9, cy - r * 0.62, cx - r + r * 0.9,
+               cy + r * 0.62], outline=INK, width=1)
+    d.ellipse([cx + r - r * 0.9, cy - r * 0.62, cx + r + r * 0.9,
+               cy + r * 0.62], outline=INK, width=1)
+    d.line([cx - r * 0.1, cy - r * 0.2, cx + r * 0.1, cy - r * 0.2],
+           fill=INK, width=1)
+
+
+def draw_bust(d, cx, top, w, hgt, skin, hair, style, suit, tie=None,
+              glasses=False, beard=None, shirt=True):
+    """Stylized cartoon bust: head, hair, shoulders/suit, simple cues."""
+    hr = w * 0.30
+    cy = top + hr + 1
+    sh_top = top + 2 * hr - 3
+    if style == "hasina":  # long dark hair behind the face
+        d.ellipse([cx - hr - 5, cy - hr - 3, cx + hr + 5, cy + hr + 13],
+                  fill=hair)
+    # neck
+    d.rectangle([cx - hr * 0.28, cy + hr - 5, cx + hr * 0.28, sh_top + 3],
+                fill=skin)
+    # shoulders / suit
+    d.polygon([(cx - w / 2, top + hgt), (cx - w / 2 + 3, sh_top + 8),
+               (cx - 5, sh_top), (cx + 5, sh_top),
+               (cx + w / 2 - 3, sh_top + 8), (cx + w / 2, top + hgt)],
+              fill=suit)
+    if shirt:
+        d.polygon([(cx - 5, sh_top), (cx + 5, sh_top),
+                   (cx, top + hgt - 4)], fill=(245, 245, 240))
+    if tie:
+        d.polygon([(cx - 2.5, sh_top + 2), (cx + 2.5, sh_top + 2),
+                   (cx + 1.2, top + hgt - 8), (cx - 1.2, top + hgt - 8)],
+                  fill=tie)
+    # head
+    d.ellipse([cx - hr, cy - hr, cx + hr, cy + hr], fill=skin)
+    # hair / head cues per style
+    if style in ("trump", "xi", "huang", "harry"):
+        d.pieslice([cx - hr, cy - hr, cx + hr, cy + hr], 180, 360, fill=hair)
+        if style == "trump":  # blond sweep across the forehead
+            d.polygon([(cx - hr, cy - hr * 0.30), (cx + hr, cy - hr * 0.52),
+                       (cx + hr, cy - hr * 0.02), (cx - hr, cy + hr * 0.10)],
+                      fill=hair)
+    elif style == "putin":  # balding: side hair only
+        d.ellipse([cx - hr - 2, cy - 3, cx - hr + 3, cy + 6], fill=hair)
+        d.ellipse([cx + hr - 3, cy - 3, cx + hr + 2, cy + 6], fill=hair)
+        d.arc([cx - hr, cy - hr, cx + hr, cy + hr], 185, 355, fill=hair,
+              width=2)
+    elif style == "pope":  # white zucchetto cap
+        d.pieslice([cx - hr, cy - hr, cx + hr, cy + hr], 180, 360,
+                   fill=(250, 250, 248), outline=INK, width=1)
+        d.ellipse([cx - hr - 1, cy - 2, cx - hr + 4, cy + 6], fill=hair)
+        d.ellipse([cx + hr - 4, cy - 2, cx + hr + 1, cy + 6], fill=hair)
+    elif style in ("hasina", "modi"):
+        d.pieslice([cx - hr, cy - hr, cx + hr, cy + hr], 180, 360, fill=hair)
+    if beard:
+        d.chord([cx - hr, cy - hr + 3, cx + hr, cy + hr + 5], 15, 165,
+                fill=beard)
+    if glasses:
+        draw_glasses(d, cx, cy + 1, hr * 0.52)
+
+
+def draw_icon(d, kind, x, y):
+    """Tiny 18x18 line icon drawn in an 18px box at (x, y)."""
+    if kind == "rocket":
+        d.polygon([(x + 9, y), (x + 13, y + 6), (x + 12, y + 12),
+                   (x + 6, y + 12), (x + 5, y + 6)], fill=(200, 60, 30))
+        d.ellipse([x + 7, y + 4, x + 11, y + 8], fill=(255, 255, 255))
+        d.polygon([(x + 5, y + 10), (x + 2, y + 15), (x + 6, y + 13)],
+                  fill=(30, 80, 160))
+        d.polygon([(x + 13, y + 10), (x + 16, y + 15), (x + 12, y + 13)],
+                  fill=(30, 80, 160))
+        d.polygon([(x + 7, y + 13), (x + 11, y + 13), (x + 9, y + 18)],
+                  fill=(255, 160, 20))
+    elif kind == "gavel":
+        d.line([x + 4, y + 14, x + 13, y + 5], fill=(120, 72, 20), width=3)
+        d.line([x + 9, y + 2, x + 16, y + 9], fill=(120, 72, 20), width=4)
+        d.line([x + 2, y + 17, x + 16, y + 17], fill=INK, width=2)
+    elif kind == "ballot":
+        d.rectangle([x + 5, y, x + 13, y + 7], fill=(255, 255, 255),
+                    outline=INK, width=1)
+        d.line([x + 7, y + 3, x + 9, y + 5], fill=(31, 122, 77), width=1)
+        d.line([x + 9, y + 5, x + 12, y + 1], fill=(31, 122, 77), width=1)
+        d.rectangle([x + 2, y + 9, x + 16, y + 17], outline=INK, width=2)
+        d.line([x + 5, y + 12, x + 13, y + 12], fill=INK, width=2)
+    elif kind == "chart":
+        d.line([x + 2, y + 2, x + 2, y + 16], fill=INK, width=2)
+        d.line([x + 2, y + 16, x + 17, y + 16], fill=INK, width=2)
+        d.line([x + 4, y + 12, x + 8, y + 8, x + 11, y + 10, x + 15, y + 4],
+               fill=(178, 34, 24), width=2)
+        d.polygon([(x + 15, y + 2), (x + 17, y + 6), (x + 13, y + 6)],
+                  fill=(178, 34, 24))
+
+
 # ---------------------------------------------------------------- flags
 def draw_flag(d, x, y, w, h, code):
     """Simplified flag badge drawn from code (no external images)."""
@@ -232,28 +329,43 @@ def main():
     f_nlab = font(SANS_B, 10)
     xs = [212, 500, 762]
     for (fig, lab), gx in zip(NUMBERS, xs):
-        d.text((gx, y0 + 7), fig, font=f_num, fill=(246, 239, 224))
+        d.text((gx, y0 + 7), fig, font=f_num, fill=(255, 208, 92))
         fw = d.textlength(fig, font=f_num)
         d.text((gx + fw + 9, y0 + 13), lab, font=f_nlab, fill=(190, 184, 168))
 
     # ---- heroes
-    hy, scene_h = 200, 84
+    hy, scene_h = 200, 92
     col_w, gap = 304, 16
     for i, (num, country, flag, head, deck, _lat, _lon) in enumerate(HEROES):
         x = MX + i * (col_w + gap)
         # scene
         sx, sy = x, hy
-        if i == 0:  # summit: sky, three flags, skyline
+        if i == 0:  # summit: sky, flags, skyline, three leaders in front
             d.rectangle([sx, sy, sx + col_w, sy + scene_h], fill=(216, 228, 238))
-            d.rectangle([sx, sy + 74, sx + col_w, sy + scene_h], fill=(70, 80, 95))
+            d.rectangle([sx, sy + 72, sx + col_w, sy + scene_h], fill=(52, 58, 70))
             for bx, bw, bh in [(8, 34, 30), (48, 26, 44), (80, 40, 24),
                                (128, 30, 52), (164, 36, 34), (206, 28, 46),
                                (240, 34, 28), (276, 24, 40)]:
-                d.rectangle([sx + bx, sy + 74 - bh, sx + bx + bw, sy + 74],
+                d.rectangle([sx + bx, sy + 72 - bh, sx + bx + bw, sy + 72],
                             fill=(40, 46, 60))
-            for fx, fc in [(48, "US"), (140, "CN"), (232, "RU")]:
-                d.line([sx + fx, sy + 12, sx + fx, sy + 74], fill=INK, width=2)
-                draw_flag(d, sx + fx + 2, sy + 12, 34, 20, fc)
+            for fx, fc in [(30, "US"), (139, "CN"), (248, "RU")]:
+                d.line([sx + fx, sy + 4, sx + fx, sy + 20], fill=INK, width=2)
+                draw_flag(d, sx + fx + 2, sy + 4, 26, 14, fc)
+            leaders = [
+                (52, "trump", (247, 203, 164), (232, 197, 90), (35, 42, 66),
+                 (178, 34, 24), "TRUMP"),
+                (152, "xi", (243, 200, 158), (18, 18, 18), (40, 40, 48),
+                 (160, 20, 30), "XI JINPING"),
+                (252, "putin", (244, 198, 160), (205, 195, 165), (45, 50, 64),
+                 (40, 60, 130), "PUTIN"),
+            ]
+            f_lab9 = font(SANS_B, 9)
+            for cxo, style, skin, hairc, suit, tie, name in leaders:
+                draw_bust(d, sx + cxo, sy + 20, 58, 58, skin, hairc, style,
+                          suit, tie=tie)
+                nw = d.textlength(name, font=f_lab9)
+                d.text((sx + cxo - nw / 2, sy + 80), name, font=f_lab9,
+                       fill=(255, 255, 255))
         elif i == 1:  # IPO: rising bars + arrow
             d.rectangle([sx, sy, sx + col_w, sy + scene_h], fill=(233, 240, 232))
             bars = [(30, 26, GREEN), (95, 46, (43, 140, 90)),
@@ -277,6 +389,14 @@ def main():
             d.ellipse([sx + 281, sy + 24, sx + 287, sy + 30], fill=RED)
             star(d, sx + 152, sy + 34, 26, 11, 8, (255, 176, 32))
             star(d, sx + 152, sy + 34, 14, 6, 8, (230, 60, 20))
+            # jet silhouette crossing the top-left sky
+            jx, jy = sx + 26, sy + 10
+            d.polygon([(jx, jy + 5), (jx + 18, jy), (jx + 34, jy + 5),
+                       (jx + 18, jy + 9)], fill=(40, 46, 60))
+            d.polygon([(jx + 4, jy + 5), (jx, jy - 3), (jx + 8, jy + 2)],
+                      fill=(40, 46, 60))
+            d.polygon([(jx + 14, jy + 7), (jx + 10, jy + 14), (jx + 20, jy + 9)],
+                      fill=(40, 46, 60))
         d.rectangle([sx, sy, sx + col_w, sy + scene_h], outline=INK, width=1)
         # kicker + headline + deck
         ky = hy + scene_h + 8
@@ -296,21 +416,51 @@ def main():
     f_num_c = font(SANS_B, 15)
     f_ctry = font(SANS_B, 9)
     f_head = font(SANS_B, 13)
+    f_lab8 = font(SANS_B, 8)
+    # figure cards: num -> (style, skin, hair, suit, tie, label, glasses, beard, shirt)
+    FIGS = {
+        4: ("huang", (246, 205, 164), (20, 20, 20), (32, 38, 52),
+            (178, 34, 24), "HUANG", True, None, True),
+        8: ("hasina", (198, 140, 96), (15, 12, 10), (128, 20, 60),
+            None, "HASINA", True, None, False),
+        14: ("harry", (246, 200, 168), (196, 96, 44), (40, 48, 66),
+             (30, 60, 120), "HARRY", False, (196, 96, 44), True),
+        15: ("modi", (206, 148, 100), (215, 215, 215), (60, 70, 90),
+             None, "MODI", True, (228, 228, 228), True),
+        19: ("pope", (240, 190, 150), (220, 220, 220), (226, 221, 208),
+             (198, 158, 44), "POPE", False, None, True),
+    }
+    ICONS = {5: "rocket", 9: "gavel", 10: "ballot", 13: "chart"}
     for idx, (num, country, flag, head, _lat, _lon) in enumerate(CARDS):
         r, c = divmod(idx, 4)
         x = MX + c * (col_w2 + gap2)
         y = gy + r * (row_h + 10)
         d.rectangle([x, y, x + col_w2, y + row_h], fill=PAPER, outline=INK, width=1)
+        d.rectangle([x, y, x + col_w2, y + 3], fill=ACCENTS[idx % len(ACCENTS)])
         d.text((x + 8, y + 6), str(num), font=f_num_c, fill=RED)
         draw_flag(d, x + 30, y + 7, 26, 17, flag)
         d.text((x + 61, y + 9), country, font=f_ctry, fill=GRAY)
-        lines = wrap(d, head, f_head, col_w2 - 16)
-        ly = y + 30
-        for ln in lines[:2]:
-            d.text((x + 8, ly), ln, font=f_head, fill=INK)
-            ly += 17
-        # thin red rule under the number column
-        d.line([x + 8, y + row_h - 6, x + 22, y + row_h - 6], fill=RED, width=2)
+        if num in ICONS:
+            draw_icon(d, ICONS[num], x + col_w2 - 26, y + 5)
+        if num in FIGS:
+            style, skin, hairc, suit, tie, label, gls, brd, shrt = FIGS[num]
+            draw_bust(d, x + 25, y + 24, 34, 42, skin, hairc, style, suit,
+                      tie=tie, glasses=gls, beard=brd, shirt=shrt)
+            lw8 = d.textlength(label, font=f_lab8)
+            d.text((x + 25 - lw8 / 2, y + 68), label, font=f_lab8, fill=GRAY)
+            lines = wrap(d, head, f_head, col_w2 - 58)
+            ly = y + 28
+            for ln in lines[:3]:
+                d.text((x + 50, ly), ln, font=f_head, fill=INK)
+                ly += 16
+        else:
+            lines = wrap(d, head, f_head, col_w2 - 16)
+            ly = y + 30
+            for ln in lines[:2]:
+                d.text((x + 8, ly), ln, font=f_head, fill=INK)
+                ly += 17
+            # thin red rule under the number column
+            d.line([x + 8, y + row_h - 6, x + 22, y + row_h - 6], fill=RED, width=2)
 
     # ---- map band
     my0, my1 = 748, 866
