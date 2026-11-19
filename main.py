@@ -19,7 +19,13 @@ DARK = (25, 25, 25)
 GRAY = (90, 86, 76)
 GREEN = (31, 122, 77)
 
-FONT_DIR = "/usr/share/fonts/truetype/dejavu"
+# Fonts ship inside the repo (fonts/) so the program does not depend on
+# the sandbox having the Debian fonts-dejavu package installed; the
+# system DejaVu dir is only a fallback.
+_HERE = os.path.dirname(os.path.abspath(__file__))
+_LOCAL_FONT_DIR = os.path.join(_HERE, "fonts")
+_SYSTEM_FONT_DIR = "/usr/share/fonts/truetype/dejavu"
+FONT_DIR = _LOCAL_FONT_DIR if os.path.isdir(_LOCAL_FONT_DIR) else _SYSTEM_FONT_DIR
 SERIF_B = os.path.join(FONT_DIR, "DejaVuSerif-Bold.ttf")
 SERIF = os.path.join(FONT_DIR, "DejaVuSerif.ttf")
 SANS_B = os.path.join(FONT_DIR, "DejaVuSans-Bold.ttf")
@@ -27,7 +33,21 @@ SANS = os.path.join(FONT_DIR, "DejaVuSans.ttf")
 
 
 def font(path, size):
-    return ImageFont.truetype(path, size)
+    try:
+        return ImageFont.truetype(path, size)
+    except OSError:
+        # Defensive: try the same file name in the other font dir, then
+        # Pillow's bundled default, rather than crashing the whole run.
+        other = (_SYSTEM_FONT_DIR if os.path.dirname(path) == _LOCAL_FONT_DIR
+                 else _LOCAL_FONT_DIR)
+        try:
+            return ImageFont.truetype(
+                os.path.join(other, os.path.basename(path)), size)
+        except OSError:
+            try:
+                return ImageFont.load_default(size)
+            except TypeError:
+                return ImageFont.load_default()
 
 
 def wrap(draw, text, fnt, max_w):
