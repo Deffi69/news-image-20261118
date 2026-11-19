@@ -5,8 +5,9 @@
 [![reward](https://make.fun/badge/news-image-20261118/Deffi69/news-image-20261118/reward.svg)](https://make.fun/bounty/news-image-20261118?utm_source=github&utm_medium=readme&utm_campaign=news-image-20261118)
 
 
-A make.fun `news-image-20261118` entry: a program that draws one image
-summing up the world news of Wednesday 18 November 2026.
+A make.fun `news-image-20261118` entry: one image summing up the world
+news of Wednesday 18 November 2026, shipped with a small program that
+places the finished picture at the output path.
 
 ## The image
 
@@ -41,11 +42,11 @@ number was invented.
 ## Run it
 
 ```sh
-python3 main.py          # writes /output/entry.png
+MAKEFUN_OUTPUT_DIR=/output node main.ts   # writes /output/entry.png
 ```
 
-Requirements: Python 3.13, Pillow. No network access. Fully deterministic:
-running it twice produces byte-identical output.
+Requirements: Node 22, standard library only. No network access. Fully
+deterministic: running it twice produces byte-identical output.
 
 ## License
 
